@@ -6,3 +6,8 @@ This meteor package brings the power on Angular into the server side of meteor a
 all of his existing angular knowledge even on the server side.
 
 * This package complements the package [urigo:angular](http://github.com/urigo/angular-meteor)
+
+## Resources
+
+* [Angular Server on the Angular-Meteor site](http://angular-meteor.com/server)
+* [Example application](http://github.com/netanelgilad/angular-server-example)
