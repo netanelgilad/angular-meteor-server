@@ -5,7 +5,7 @@ Love [angular-meteor](http://angular-meteor.com)? Try it on the server side and 
 This meteor package brings the power on Angular into the server side of meteor apps, allowing the developer to use
 all of his existing angular knowledge even on the server side.
 
-* This package complements the package [urigo:angular](http://github.com/urigo/angular-meteor)
+* This package complements the package [angular](http://github.com/urigo/angular-meteor)
 
 ## Resources
 
