@@ -1,85 +1,52 @@
-var serverInstances = new Meteor.Collection('serverInstances');
+angular.module('angular-meteor')
 
-window.name = 'NG_DEFER_BOOTSTRAP!';
+.config(['$provide', '$injector', function($provide, $injector) {
+  angular.forEach(Meteor.settings.public['netanelgilad:angular-server'], (funcDefs, name) => {
+    if ($injector.has(name)) {
+      $provide.decorator(name, ['$delegate', '$q', function($delegate, $q) {
+        let serviceInstance = {};
+        angular.forEach(funcDefs, function (funcDef) {
+          serviceInstance[funcDef] = function (...args) {
+            let deferred = $q.defer();
+            let methodName = 'angular:' + name + '/' + funcDef;
 
-Meteor.subscribe('serverInstances', function () {
-  var modules = [];
+            Meteor.call(methodName, ...args, (err, data) => {
+              if (err)
+                deferred.reject(err.details);
+              else
+                deferred.resolve(data);
+            });
 
-  serverInstances.find({}).forEach(function (instance) {
-    'use strict';
-    modules.push(['$provide', '$injector', function ($provide, $injector) {
-      if ($injector.has(instance.name)) {
-        $provide.decorator(instance.name, ['$delegate', '$q', function($delegate, $q) {
-          var serviceInstance = {};
-          angular.forEach(instance.funcDefs, function (funcDef) {
-            serviceInstance[funcDef] = function () {
-              var args = Array.prototype.slice.call(arguments);
+            return deferred.promise;
+          };
+        });
 
-              var deferred = $q.defer();
+        serviceInstance.$$originalInstance = $delegate;
 
-              Meteor.call.apply(this, [
-                'angular:service',
-                instance.name,
-                funcDef,
-                args,
-                function (err, data) {
-                  if (err)
-                    deferred.reject(err.details);
-                  else
-                    deferred.resolve(data);
-                }
-              ]);
+        return serviceInstance;
+      }]);
+    }
+    else {
+      $provide.factory(name, ['$q', function ($q) {
+        var serviceInstance = {};
+        angular.forEach(funcDefs, function (funcDef) {
+          serviceInstance[funcDef] = function (...args) {
+            var deferred = $q.defer();
+            let methodName = 'angular:' + name + '/' + funcDef;
 
-              return deferred.promise;
-            };
-          });
+            Meteor.call(methodName, ...args, (err, data) => {
+              if (err)
+                deferred.reject(err.details);
+              else
+                deferred.resolve(data);
+            });
 
-          serviceInstance.$$originalInstance = $delegate;
+            return deferred.promise;
+          };
+        });
 
-          return serviceInstance;
-        }]);
-      }
-      else {
-        $provide.factory(instance.name, ['$q', function ($q) {
-          var serviceInstance = {};
-          angular.forEach(instance.funcDefs, function (funcDef) {
-            serviceInstance[funcDef] = function () {
-              var deferred = $q.defer();
-
-              var args = Array.prototype.slice.call(arguments);
-
-              Meteor.call.apply(this, [
-                'angular:service',
-                instance.name,
-                funcDef,
-                args,
-                function (err, data) {
-                  if (err)
-                    deferred.reject(err.details);
-                  else
-                    deferred.resolve(data);
-                }
-              ]);
-
-              return deferred.promise;
-            };
-          });
-
-          return serviceInstance;
-        }]);
-      }
-    }]);
+        return serviceInstance;
+      }]);
+    }
   });
-
-  // XXX make sure resumeBootstrap is defined before calling it
-  (function resume() {
-    setTimeout(function () {
-      if (!angular.resumeBootstrap) {
-        resume();
-      }
-      else {
-        angular.resumeBootstrap(modules);
-      }
-    }, 1);
-  })();
-});
+}]);

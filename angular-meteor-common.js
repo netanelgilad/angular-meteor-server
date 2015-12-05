@@ -5,7 +5,7 @@ angular.module('angular-meteor')
   .provider('ServerAPI', function() {
     var serverAPIs = [];
     return {
-      register : function(apis) {
+      register : function(...apis) {
         serverAPIs = serverAPIs.concat(apis);
       },
       $get : function() {
@@ -18,33 +18,40 @@ angular.module('angular-meteor')
     }
   })
   .run(['$injector', '$q', function($injector, $q) {
-    Meteor.methods({
-      'angular:service' : function(name, prop, args) {
-        var service = $injector.get(name);
-        var result;
+    let methods = {};
 
-        // XXX - think if better to apply with meteor's this or the service
-        if (Meteor.isClient && angular.isDefined(service.$$originalInstance)) {
-          result = service.$$originalInstance[prop].apply(this, args);
-        }
-        else {
-          result = service[prop].apply(this, args);
-        }
+    angular.forEach(Meteor.settings.public['netanelgilad:angular-server'], (funcDefs, name) => {
+      angular.forEach(funcDefs, (func) => {
+        let methodName = 'angular:' + name + '/' + func;
 
-        if (Meteor.isServer) {
-          var futureResponse = new Future();
-          $q.when(result).then(function(returnValue) {
-            futureResponse.return(returnValue);
-          }, function(error) {
-            futureResponse.throw(new Meteor.Error('angular:service', 'Promise Rejected', error));
-          });
+        methods[methodName] = function(...args) {
+          var service = $injector.get(name);
+          var result;
 
-          return futureResponse.wait();
-        }
-        else {
-          return result;
-        }
+          // XXX - think if better to apply with meteor's this or the service
+          if (Meteor.isClient && angular.isDefined(service.$$originalInstance)) {
+            result = service.$$originalInstance[func].apply(this, args);
+          }
+          else {
+            result = service[func].apply(this, args);
+          }
 
-      }
+          if (Meteor.isServer) {
+            var futureResponse = new Future();
+            $q.when(result).then(function(returnValue) {
+              futureResponse.return(returnValue);
+            }, function(error) {
+              futureResponse.throw(new Meteor.Error('angular:service', 'Promise Rejected', error));
+            });
+
+            return futureResponse.wait();
+          }
+          else {
+            return result;
+          }
+        }
+      });
     });
+
+    Meteor.methods(methods);
   }]);
