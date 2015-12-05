@@ -12,7 +12,7 @@ angular.module('angular-meteor')
 
             Meteor.call(methodName, ...args, (err, data) => {
               if (err)
-                deferred.reject(err.details);
+                deferred.reject(err);
               else
                 deferred.resolve(data);
             });
@@ -36,7 +36,7 @@ angular.module('angular-meteor')
 
             Meteor.call(methodName, ...args, (err, data) => {
               if (err)
-                deferred.reject(err.details);
+                deferred.reject(err);
               else
                 deferred.resolve(data);
             });
