@@ -9,6 +9,8 @@ Package.describe({
 Package.onUse(function(api) {
   api.versionsFrom('1.2.0.2');
   api.use('ecmascript', 'server');
+  api.use('http', 'server');
+
   api.use('angular@1.2.2', 'client');
   api.use('netanelgilad:polyfill-angular-server@1.4.0', 'server');
   api.imply('netanelgilad:polyfill-angular-server@1.4.0', 'server');
@@ -18,7 +20,7 @@ Package.onUse(function(api) {
   api.addFiles('angular-meteor-common.js');
 
   // server modules
-  api.addFiles('modules/http.js', 'server');
+  api.addFiles('modules/httpBackend.js', 'server');
 });
 
 Package.onTest(function(api) {
