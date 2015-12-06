@@ -1,6 +1,8 @@
-angular.module('angular-meteor')
+window.name = 'NG_DEFER_BOOTSTRAP!';
 
-.config(['$provide', '$injector', function($provide, $injector) {
+let modules = [];
+
+modules.push(['$provide', '$injector', function($provide, $injector) {
   angular.forEach(Meteor.settings.public['netanelgilad:angular-server'], (funcDefs, name) => {
     if ($injector.has(name)) {
       $provide.decorator(name, ['$delegate', '$q', function($delegate, $q) {
@@ -50,3 +52,15 @@ angular.module('angular-meteor')
     }
   });
 }]);
+
+// XXX make sure resumeBootstrap is defined before calling it
+(function resume() {
+  setTimeout(function () {
+    if (!angular.resumeBootstrap) {
+      resume();
+    }
+    else {
+      angular.resumeBootstrap(modules);
+    }
+  }, 1);
+})();
