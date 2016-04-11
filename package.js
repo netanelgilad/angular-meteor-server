@@ -10,8 +10,9 @@ Package.onUse(function(api) {
   api.versionsFrom('1.2.0.2');
   api.use('ecmascript', 'server');
   api.use('http', 'server');
+  api.use('modules', 'client');
 
-  api.use('angular@1.2.2', 'client');
+  api.use('angular@1.3.9_2', 'client');
   api.use('netanelgilad:polyfill-angular-server@1.4.0', 'server');
   api.imply('netanelgilad:polyfill-angular-server@1.4.0', 'server');
 
