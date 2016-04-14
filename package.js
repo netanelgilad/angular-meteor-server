@@ -1,6 +1,6 @@
 Package.describe({
   name: 'netanelgilad:angular-server',
-  version: '1.4.8',
+  version: '1.4.10',
   summary: 'Develop FullStack applications with the Angular framework!',
   git: 'http://github.com/netanelgilad/angular-meteor-server',
   documentation: 'README.md'
