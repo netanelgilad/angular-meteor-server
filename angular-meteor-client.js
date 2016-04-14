@@ -1,3 +1,6 @@
+angular = require('angular')
+require('angular-meteor')
+
 window.name = 'NG_DEFER_BOOTSTRAP!';
 
 let modules = [];
