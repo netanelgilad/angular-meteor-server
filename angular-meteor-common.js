@@ -53,5 +53,27 @@ angular.module('angular-meteor')
       });
     });
 
-    Meteor.methods(methods);
+    /**
+     * Make angular-server testable. When angular is setup again and again by unit or integration tests
+     * Meteor.methods() is called again and again with the same method object map. The current Meteor version throws
+     * an exception if a method is registered to Meteor.methods() more than once with the same method name. So this
+     * patch calls Meteor.methods() only with the method names the have not been registered before.
+     */
+    let registeredMethods = {};
+    let unregisteredMethods = {};
+
+    if (Meteor.isServer) {
+      registeredMethods = Meteor.server.method_handlers;
+    }
+    if (Meteor.isClient) {
+        registeredMethods = Meteor.connection._methodHandlers;
+    }
+
+    angular.forEach(methods, function(funcDef, name) {
+      if (registeredMethods[name] === undefined) {
+        unregisteredMethods[name] = funcDef;
+      }
+    });
+
+    Meteor.methods(unregisteredMethods);
   }]);
